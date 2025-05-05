@@ -1,0 +1,7 @@
+[run]
+omit =
+    mansions_of_madness/prod_settings.py
+    mansions_of_madness/asgi.py
+    mansions_of_madness/wsgi.py
+    manage.py
+    */management/*
