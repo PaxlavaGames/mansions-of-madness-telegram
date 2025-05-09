@@ -1,4 +1,4 @@
-from telegram_framework import links, commands
+from telegram_framework import links
 
 
 bot_links = links.include_all(
@@ -7,7 +7,3 @@ bot_links = links.include_all(
         'mainapp.links',
     ]
 )
-
-bot_links += [
-    links.on_command(commands.user_commands, 'commands', 'Доступные команды')
-]

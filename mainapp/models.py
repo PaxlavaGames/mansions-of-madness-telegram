@@ -47,17 +47,57 @@ def frequency():
     return result
 
 
-def to_pictures(results):
+def to_pictures(results, drop_format='one by one'):
     mapper = {
-        #'Success': '✅',
         'Success': '❤️',
         'Evidence': '🔍',
-        # 'Empty': '💀',
         'Empty': '👿',
     }
-    return [mapper[result] for result in results]
+    mapped_list = [mapper[result] for result in results]
+    if drop_format == 'one by one':
+        return mapped_list
+
+    def sort_function(result):
+        sort_table = {
+            '❤️': 1,
+            '🔍': 2,
+            '👿': 3,
+        }
+        return sort_table[result]
+    mapped_list = sorted(mapped_list, key=sort_function)
+    return [''.join(mapped_list)]
+
 
 
 def make_delay():
-    delay = random.uniform(0, 1)
+    delay = random.uniform(0.2, 1.5)
     time.sleep(delay)
+
+
+class Delay(models.Model):
+    enabled = models.BooleanField(default=True)
+    user_id = models.CharField(max_length=128)
+
+
+def save_delay(enabled, user_id):
+    Delay.objects.create(enabled=enabled, user_id=user_id)
+
+
+def is_delay_enabled(user_id):
+    delay = Delay.objects.filter(user_id=user_id).last()
+    return delay.enabled if delay else True
+
+
+class DropFormat(models.Model):
+    # one by one, raw
+    name = models.CharField(max_length=10)
+    user_id = models.CharField(max_length=128)
+
+
+def save_drop_format(name, user_id):
+    DropFormat.objects.create(name=name, user_id=user_id)
+
+
+def get_drop_format(user_id):
+    drop_format = DropFormat.objects.filter(user_id=user_id).last()
+    return drop_format.name if drop_format else 'one by one'

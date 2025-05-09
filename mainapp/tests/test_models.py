@@ -71,3 +71,34 @@ class TestSaveStatistic(TestCase):
 
         result = models.frequency()
         self.assertEqual(expected_result, result)
+
+
+class TestUserSettings(TestCase):
+
+    def test_save_delay(self):
+        self.assertFalse(models.Delay.objects.all().exists())
+        models.save_delay(False, 123)
+        self.assertTrue(models.Delay.objects.all().exists())
+        models.save_delay(True, 123)
+        self.assertEqual(2, models.Delay.objects.count())
+
+    def test_get_delay(self):
+        self.assertTrue(models.is_delay_enabled(123))
+        models.save_delay(False, 123)
+        self.assertFalse(models.is_delay_enabled(123))
+        models.save_delay(True, 123)
+        self.assertTrue(models.is_delay_enabled(123))
+
+    def test_save_drop_format(self):
+        self.assertFalse(models.DropFormat.objects.all().exists())
+        models.save_drop_format('raw', 123)
+        self.assertTrue(models.DropFormat.objects.all().exists())
+        models.save_drop_format('one by one', 123)
+        self.assertEqual(2, models.DropFormat.objects.count())
+
+    def test_get_drop_format(self):
+        self.assertEqual('one by one', models.get_drop_format(123))
+        models.save_drop_format('raw', 123)
+        self.assertEqual('raw', models.get_drop_format(123))
+        models.save_drop_format('one by one', 123)
+        self.assertEqual('one by one', models.get_drop_format(123))

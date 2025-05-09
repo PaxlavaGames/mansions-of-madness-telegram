@@ -3,4 +3,4 @@ def is_valid(message):
     if not text.isdigit():
         return False
     number = int(text)
-    return 0 < number < 100
+    return 0 < number < 50

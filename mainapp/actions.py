@@ -14,7 +14,7 @@ def introduction(bot, message):
 
 def invalid_input_action(bot, message):
     invalid_message = messages.create_message(
-        'Нужно ввести положительное число < 100',
+        'Нужно ввести положительное число < 50',
         bot,
     )
     return actions.send_message(message.chat, invalid_message)
@@ -25,13 +25,15 @@ def drop_cubes_action(bot, message):
 
     count = int(message.text)
     results = models.drop_cubes(count)
-    pictures = models.to_pictures(results)
+    drop_format = models.get_drop_format(message.sender.id)
+    pictures = models.to_pictures(results, drop_format)
     for result in pictures:
         result_message = messages.create_message(
             result,
             bot,
         )
-        models.make_delay()
+        if models.is_delay_enabled(message.sender.id):
+            models.make_delay()
         chat = actions.send_message(chat, result_message)
 
     models.Drop.objects.create(results=results)
@@ -49,3 +51,37 @@ def statistics_action(bot, message):
         bot,
     )
     return actions.send_message(message.chat, result_message)
+
+
+def save_delay(bot, message, delay, text):
+    models.save_delay(delay, message.sender.id)
+    response_message = messages.create_message(
+        f'Задержка перед броском {text}',
+        bot,
+    )
+    return actions.send_message(message.chat, response_message)
+
+
+def enable_delay(bot, message):
+    return save_delay(bot, message, True, 'включена')
+
+
+def disable_delay(bot, message):
+    return save_delay(bot, message, False, 'отключена')
+
+
+def save_drop_format(bot, message, name, text):
+    models.save_drop_format(name, message.sender.id)
+    response_message = messages.create_message(
+        f'Включен вывод {text}',
+        bot,
+    )
+    return actions.send_message(message.chat, response_message)
+
+
+def set_raw_format(bot, message):
+    return save_drop_format(bot, message, 'raw', 'в строчку')
+
+
+def set_one_by_one_format(bot, message):
+    return save_drop_format(bot, message, 'one by one', 'по очереди')
