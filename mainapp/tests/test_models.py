@@ -1,7 +1,10 @@
+from datetime import date
 import random
 import json
+
 from django.test import TestCase, SimpleTestCase
 from mainapp import models
+from mainapp.tests.data import EXPECTED_IDEAL
 
 
 class TestDropCube(SimpleTestCase):
@@ -102,3 +105,66 @@ class TestUserSettings(TestCase):
         self.assertEqual('raw', models.get_drop_format(123))
         models.save_drop_format('one by one', 123)
         self.assertEqual('one by one', models.get_drop_format(123))
+
+
+class TestEquity(TestCase):
+
+    def setUp(self):
+        self.some_date = date(
+            year=2024,
+            month=12,
+            day=1,
+        )
+        self.expected_empty = {
+            'Success': {
+                'expected': 0.,
+                'count': 0,
+                'difference': 0.,
+            },
+            'Evidence': {
+                'expected': 0.,
+                'count': 0,
+                'difference': 0.,
+            },
+            'Empty': {
+                'expected': 0.,
+                'count': 0,
+                'difference': 0.,
+            },
+        }
+        self.expected_ideal = EXPECTED_IDEAL
+        self.ideal = [
+            'Success',
+            'Success',
+            'Success',
+            'Empty',
+            'Empty',
+            'Empty',
+            'Evidence',
+            'Evidence',
+        ]
+
+    def test_equity_empty(self):
+        equity = models.all_equity([])
+        self.assertEqual(self.expected_empty, equity)
+
+    def test_all_equity_ideal(self):
+        equity = models.all_equity(self.ideal)
+        self.assertEqual(self.expected_ideal, equity)
+
+    def test_date_equity_empty(self):
+        equity = models.date_equity(self.some_date)
+        self.assertEqual(self.expected_empty, equity)
+
+    def test_date_equity_ideal(self):
+        drop = models.Drop.objects.create(results=self.ideal)
+        drop.create = self.some_date
+        drop.save()
+        equity = models.date_equity(self.some_date)
+        self.assertEqual(self.expected_ideal, equity)
+
+    def test_show_equity(self):
+        expected_output = ('❤️: факт - 3, ожидание - 3.0, разница - 0.0\n'
+                           '🔍: факт - 2, ожидание - 2.0, разница - 0.0\n'
+                           '👿: факт - 3, ожидание - 3.0, разница - 0.0')
+        self.assertEqual(expected_output, models.equity_to_str(self.expected_ideal))

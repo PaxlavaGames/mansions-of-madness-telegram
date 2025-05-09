@@ -101,3 +101,69 @@ def save_drop_format(name, user_id):
 def get_drop_format(user_id):
     drop_format = DropFormat.objects.filter(user_id=user_id).last()
     return drop_format.name if drop_format else 'one by one'
+
+
+VARIANTY = {
+    'Success': 3/8,
+    'Evidence': 2/8,
+    'Empty': 3/8,
+}
+
+
+def one_equity(results, name):
+    total = len(results)
+    count = results.count(name)
+    expected = total * VARIANTY[name]
+    difference = count - expected  # > 0 удача, < 0 неудача
+    return expected, count, difference
+
+
+def all_equity(results):
+    drop_names = [
+        'Success', 'Evidence', 'Empty'
+    ]
+    result = {}
+    for name in drop_names:
+        expected, count, difference = one_equity(results, name)
+        result[name] = {
+            'expected': expected,
+            'count': count,
+            'difference': difference,
+        }
+    return result
+
+
+def date_equity(date):
+    drops = Drop.objects.filter(
+        create__day=date.day,
+        create__month=date.month,
+        create__year=date.year
+    )
+    results = []
+    for drop in drops:
+        results += drop.results
+    equity = all_equity(results)
+    return equity
+
+
+def equity_to_str(equity):
+    order_list = [
+        'Success',
+        'Evidence',
+        'Empty',
+    ]
+    mapper = {
+        'Success': '❤️',
+        'Evidence': '🔍',
+        'Empty': '👿',
+    }
+    result_rows = []
+    for order_item in order_list:
+        data = equity[order_item]
+        row_str = (f'{mapper[order_item]}: '
+                   f'факт - {data["count"]}, '
+                   f'ожидание - {data["expected"]}, '
+                   f'разница - {data["difference"]}')
+        result_rows.append(row_str)
+    result = '\n'.join(result_rows)
+    return result

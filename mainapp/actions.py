@@ -1,3 +1,4 @@
+from datetime import datetime
 from telegram_framework import messages, actions
 from .keyboards import menu_numbers_keyboard
 from . import models
@@ -85,3 +86,14 @@ def set_raw_format(bot, message):
 
 def set_one_by_one_format(bot, message):
     return save_drop_format(bot, message, 'one by one', 'по очереди')
+
+
+def get_date_equity(bot, message):
+    date = datetime.strptime(message.text, '%d.%m.%Y')
+    equity = models.date_equity(date)
+    response_text = models.equity_to_str(equity)
+    response_message = messages.create_message(
+        response_text,
+        bot,
+    )
+    return actions.send_message(message.chat, response_message)

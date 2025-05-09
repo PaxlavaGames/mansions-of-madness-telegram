@@ -2,6 +2,7 @@ from telegram_framework.test import TestCase
 from mainapp import models
 
 
+
 class TestCommands(TestCase):
 
 
@@ -130,3 +131,7 @@ class TestCommands(TestCase):
         chat = self.assertCommandWasHandled('/set_one_by_one_format', self.chat)
         self.assertChatLastMessageTextEqual(chat, 'Включен вывод по очереди')
         self.assertEqual('one by one', models.get_drop_format(user_id))
+
+
+    def test_get_date_equity_empty(self):
+        self.assertTextMessageWasHandled('22.01.2024', self.chat)

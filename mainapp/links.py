@@ -16,5 +16,6 @@ bot_links = [
     links.on_command(actions.statistics_action, 'statistics', 'Статистика'),
     links.on_command(commands.bot_father_commands, 'bot_father_commands'),
     links.on_message(actions.drop_cubes_action, filters.is_valid),
+    links.on_message(actions.get_date_equity, filters.is_date),
     links.on_message(actions.invalid_input_action),
 ]
